@@ -1,5 +1,7 @@
 <p align="center"><img src="assets/hero.png" alt="looot-local-leads: local businesses worth pitching" width="100%"></p>
 
+<p align="center"><img src="assets/screenshot-desktop.png" alt="Campaign with the sidebar" width="68%"> <img src="assets/screenshot-mobile.png" alt="Campaign on a phone, dark theme" width="22%"></p>
+
 # looot local leads
 
 [![License](https://img.shields.io/github/license/loootai/looot-local-leads)](LICENSE) [![Release](https://img.shields.io/github/v/release/loootai/looot-local-leads)](https://github.com/loootai/looot-local-leads/releases) [![Docs](https://img.shields.io/badge/docs-docs.looot.ai-12A06A)](https://docs.looot.ai)
