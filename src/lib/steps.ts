@@ -131,7 +131,7 @@ export async function runStep(step: Step, ctx: Ctx): Promise<StepResult> {
   if (step === "search") {
     const page = c.pages_fetched + 1;
     await guard("search", async () => {
-      const run = await budget.run(JOBS.search, { query: c.query, location: c.location, ...(page > 1 ? { page } : {}) }, `ll-${c.id}-search-p${page}`);
+      const run = await budget.run(JOBS.search, { query: c.query, q: c.query, location: c.location, ...(page > 1 ? { page } : {}) }, `ll-${c.id}-search-p${page}`);
       if (!run) return;
       if (run.status !== "completed") throw new Error(run.error?.message ?? run.status);
       const known = new Set(leads.map((l) => l.place_key));
@@ -198,7 +198,8 @@ export async function runStep(step: Step, ctx: Ctx): Promise<StepResult> {
 
 function readMarkdown(run: LoootRun): string | null {
   const r = run.result as Record<string, unknown> | string | null | undefined;
-  const c = [run.normalized?.markdown, typeof r === "string" ? r : r?.markdown, typeof r === "object" && r ? r.text ?? r.content : undefined];
+  const fields = (run.normalized?.fields ?? {}) as Record<string, unknown>;
+  const c = [run.normalized?.markdown, fields.markdown, typeof r === "string" ? r : r?.markdown, typeof r === "object" && r ? r.text ?? r.content : undefined];
   for (const v of c) if (typeof v === "string" && v.trim()) return v;
   return null;
 }

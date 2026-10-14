@@ -91,7 +91,8 @@ export function domainOf(website: string | null): string | null {
 
 /** Maps a verification run to valid, catch_all, risky, invalid or unknown. */
 export function emailStatus(run: { normalized?: Record<string, unknown> | null; result?: unknown }): string {
-  const n = run.normalized ?? {};
+  // looot puts the mapped values of a job under normalized.fields; older shapes put them on normalized itself.
+  const n = { ...((run.normalized?.fields as Record<string, unknown> | undefined) ?? {}), ...(run.normalized ?? {}) } as Record<string, unknown>;
   const r = (typeof run.result === "object" && run.result !== null ? run.result : {}) as Record<string, unknown>;
   const raw = String(n.status ?? r.status ?? r.result ?? r.verdict ?? (r.data as Record<string, unknown> | undefined)?.status ?? "").toLowerCase();
   if (/catch.?all|accept.?all/.test(raw)) return "catch_all";

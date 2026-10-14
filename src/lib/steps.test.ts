@@ -61,7 +61,7 @@ describe("search", () => {
     const runner = fake(() => mapsAnswer);
     const r = await runStep("search", { campaign, runner, store, prices, maxCostUsd: 0.05, perRunCapUsd: 0.03, now: NOW });
     expect(r).toMatchObject({ runs: 1, changed: 3, stoppedForBudget: false });
-    expect(runner.calls[0]).toMatchObject({ job: "maps.local.search", input: { query: "dentist", location: "Lyon, France" }, key: "ll-c1-search-p1", cap: 0.03 });
+    expect(runner.calls[0]).toMatchObject({ job: "maps.local.search", input: { query: "dentist", q: "dentist", location: "Lyon, France" }, key: "ll-c1-search-p1", cap: 0.03 });
     expect(store.rows.find((l) => l.place_key === "p1")).toMatchObject({ gaps: ["no_website", "low_rating", "few_reviews"], score: 5 });
     expect(store.pages).toBe(1);
     const again = await runStep("search", { campaign: { ...campaign, pages_fetched: 1 }, runner: fake(() => mapsAnswer), store, prices, maxCostUsd: 0.05, perRunCapUsd: 0.03 });
@@ -83,6 +83,20 @@ describe("audit", () => {
     expect(old.gaps).toEqual(["outdated_site", "no_booking", "thin_site"]);
     expect(old.score).toBe(5);
     expect(store.rows.find((l) => l.place_key === "p3")).toMatchObject({ gaps: [], score: 0, email: at("hello", "good-site.test") });
+  });
+
+  it("reads the page from normalized.fields.markdown, where looot puts it", async () => {
+    const store = new MemoryStore();
+    await runStep("search", { campaign, runner: fake(() => mapsAnswer), store, prices, maxCostUsd: 0.05, perRunCapUsd: 0.03 });
+    const runner = fake(web, 0.0002);
+    const inner = runner.runAndWait.getMockImplementation()!;
+    runner.runAndWait.mockImplementation(async (...a) => {
+      const run = await inner(...a);
+      return { ...run, normalized: { fields: { markdown: (run.result as { markdown: string }).markdown } }, result: { code: "200", data: {} } };
+    });
+    await runStep("audit", { campaign, runner, store, prices, maxCostUsd: 0.01, perRunCapUsd: 0.03, now: NOW });
+    expect(store.rows.find((l) => l.place_key === "p2")!.gaps).not.toContain("site_unreachable");
+    expect(store.rows.find((l) => l.place_key === "p3")).toMatchObject({ gaps: [], email: at("hello", "good-site.test") });
   });
 
   it("marks a site that did not load", async () => {

@@ -42,6 +42,7 @@ describe("scoring and helpers", () => {
   it("reads the domain", () => expect(domainOf("https://www.Cabinet-A.test/x")).toBe("cabinet-a.test"));
   it.each([
     [{ normalized: { status: "valid" } }, "valid"],
+    [{ normalized: { fields: { status: "catch_all" } } }, "catch_all"],
     [{ result: { result: "deliverable" } }, "valid"],
     [{ result: { status: "catch_all" } }, "catch_all"],
     [{ result: { status: "undeliverable" } }, "invalid"],
